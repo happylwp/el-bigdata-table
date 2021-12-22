@@ -85,7 +85,7 @@ ElTableBody.methods.isRenderCell = function (column, cellIndex) {
   return table.useVirtualColumn ? isInVisibleArea || isFixedColumnInSideFixedBody : !isFixedColumn || isFixedColumnInSideFixedBody
 }
 
-const oldGetCellStyle = ElTableBody.getCellStyle
+const oldGetCellStyle = ElTableBody.methods.getCellStyle
 ElTableBody.methods.getCellStyle = function (rowIndex, columnIndex, row, column) {
   if (this.table.useVirtual) {
     let cellStyle = this.table.cellStyle;
