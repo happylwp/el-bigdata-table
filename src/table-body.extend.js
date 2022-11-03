@@ -6,25 +6,6 @@ import Mousewheel from 'element-ui/lib/directives/mousewheel'
 
 import VirtualTableBodyRender from './virtual-table-body-render.js'
 
-function trans (version) {
-  const versionNums = version.toString().split('.')
-  let result = Array.from({ length: 3 })
-
-  result = result.map((_, idx) => {
-    const num = versionNums[idx]
-
-    if (!num) {
-      return '00'
-    } else {
-      return +num < 10 ? `0${num}` : num
-    }
-  }).join('')
-
-  return +result
-}
-
-const newVersion = trans(ElementUi.version) >= trans(2.8)
-
 const ElTableBody = Table.components.TableBody
 
 ElTableBody.directives = {
@@ -57,16 +38,20 @@ ElTableBody.methods.getIndex = function (index) {
 }
 
 const oldGetRowClassHandler = ElTableBody.methods.getRowClass
+/**
+ * @description: 更新当前行的hover的类样式
+ * @param {*} row
+ * @param {*} rowIndex
+ * @return {*}
+ */
 ElTableBody.methods.getRowClass  = function (row, rowIndex) {
   let classes = oldGetRowClassHandler.call(this, row, rowIndex)
-
   if (
     this.table.useVirtual
     && rowIndex === this.store.states.hoverRow
     && (this.table.rightFixedColumns.length || this.table.fixedColumns.length)
   ) {
-    // 兼容element-ui低版本
-    if (newVersion && Object.prototype.toString.call(classes) === '[object Array]') {
+    if (Object.prototype.toString.call(classes) === '[object Array]') {
       classes.push('hover-row')
     } else if (typeof classes === 'string') {
       classes += ' hover-row'
@@ -76,16 +61,15 @@ ElTableBody.methods.getRowClass  = function (row, rowIndex) {
   return classes
 }
 
-ElTableBody.methods.isRenderCell = function (column, cellIndex) {
-  const { table } = this
-  const isFixedColumn = column.fixed
-  const isFixedColumnInSideFixedBody = isFixedColumn && this.fixed
-  const isInVisibleArea = cellIndex >= table.columnStart && cellIndex <= table.columnEnd
-
-  return table.useVirtualColumn ? isInVisibleArea || isFixedColumnInSideFixedBody : !isFixedColumn || isFixedColumnInSideFixedBody
-}
-
 const oldGetCellStyle = ElTableBody.methods.getCellStyle
+/**
+ * @description: cell style注入rowHeight变量的高度
+ * @param {*} rowIndex
+ * @param {*} columnIndex
+ * @param {*} row
+ * @param {*} column
+ * @return {*}
+ */
 ElTableBody.methods.getCellStyle = function (rowIndex, columnIndex, row, column) {
   if (this.table.useVirtual) {
     let cellStyle = this.table.cellStyle;
@@ -110,7 +94,7 @@ ElTableBody.methods.getCellStyle = function (rowIndex, columnIndex, row, column)
 const oldRender = ElTableBody.render
 ElTableBody.render = function (h) {
   if (this.table.useVirtual) {
-    return VirtualTableBodyRender.call(this, h)
+    return VirtualTableBodyRender.call(this, h, oldRender)
   } else {
     return oldRender.call(this, h)
   }

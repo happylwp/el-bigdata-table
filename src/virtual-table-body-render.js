@@ -1,5 +1,4 @@
-export default function render(h) {
-  const data = this.data || [];
+export default function render(h, oldRender) {
   return (
     <div
       style={[{height: `${this.table.virtualBodyHeight}px`}]}
@@ -7,34 +6,9 @@ export default function render(h) {
       v-mousewheel={this.table.handleFixedMousewheel}
     >
       <div style={[{transform: `translateY(${this.table.innerTop}px)`}]}>
-      <table
-        class="el-table__body"
-        cellspacing="0"
-        cellpadding="0"
-        border="0">
-        <colgroup>
-          {
-            this.columns
-              .filter((column, index) => !(this.columnsHidden[index] && this.fixed))
-              .map(column => <col name={column.id} key={column.id} />)
-          }
-        </colgroup>
-        <tbody>
-          {
-            data.reduce((acc, row) => {
-              const isSelected = this.store.isSelected(row);
-              const isExpanded = this.store.states.expandRows.indexOf(row) > -1;
-              return acc.concat(this.wrappedRowRender({
-                row,
-                $index: acc.length,
-                isSelected,
-                isExpanded
-              }));
-            }, [])
-          }
-          <el-tooltip effect={ this.table.tooltipEffect } popper-class="el-table-tooltip" placement="top" ref="tooltip" content={ this.tooltipContent }></el-tooltip>
-        </tbody>
-      </table>
+      {
+        oldRender.call(this, h)
+      }
       </div>
     </div>
   );
